@@ -1,29 +1,26 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
-	"time"
 )
 
 func main() {
-	mux := http.NewServeMux()
+	http.HandleFunc("GET /healthz", healthHandler)
+	log.Fatal(http.ListenAndServe("localhost:8000", nil))
+}
 
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"status":"ok"}`))
-	})
+type healthResponse struct {
+	Status string `json:"status"`
+}
 
-	server := &http.Server{
-		Addr:              ":8080",
-		Handler:           mux,
-		ReadHeaderTimeout: 5 * time.Second,
-	}
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 
-	log.Println("Vaultech API listening on http://localhost:8080")
+	rsp := healthResponse{Status: "ok"}
 
-	if err := server.ListenAndServe(); err != nil {
-		log.Fatal(err)
+	if err := json.NewEncoder(w).Encode(rsp); err != nil {
+		log.Print(err)
 	}
 }
