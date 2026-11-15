@@ -7,8 +7,13 @@ import (
 )
 
 func main() {
-	http.HandleFunc("GET /healthz", healthHandler)
-	log.Fatal(http.ListenAndServe("localhost:8000", nil))
+	log.Fatal(http.ListenAndServe("localhost:8000", newRouter()))
+}
+
+func newRouter() *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /healthz", healthHandler)
+	return mux
 }
 
 type healthResponse struct {
